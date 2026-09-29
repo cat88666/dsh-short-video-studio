@@ -449,6 +449,15 @@ node scripts/import-comfy.mjs exported.json \
 
 > 更早版本的完整变更见 [GitHub Releases](https://github.com/fengyungithub/dsh-short-video-studio/releases)（每次打 `v*` tag 自动生成）。
 
+### v1.8.1 — 仓库不再跟踪 pnpm 本地缓存（2026-09-29）
+
+> **包内容零变化**：本版只动仓库卫生（`.gitignore` + 取消跟踪），`lib` / `studio` / `skills` / `workflows` / `schemas` 与 v1.8.0 完全一致，升级无行为影响。
+
+**📝 文档/其它**
+
+- 仓库不再跟踪 **`.pnpm-store/`**：pnpm 在本机默认把 store 建在**项目根**（`.pnpm-store/v10`），这个 31 MB / 2315 个内容寻址文件的纯下载缓存因 `.gitignore` 漏配规则被一次 `git add -A` 误入库、并随 v1.8.0 推到远端。本版补上忽略规则并 `git rm -r --cached`，磁盘缓存与 `node_modules` 原样保留。
+- 顺带说明为什么此前没被发现：`package.json` 的 `files` 白名单本就不含它，npm tarball 一直是干净的——污染只在仓库体积（`.git` 里 25.6 MB）。历史清理需重写历史 + force push，本版未做。
+
 ### v1.8.0 — 统一档位与工具面（图片并入 tier · 不再接受 `workflow=`）· Qwen-Image 2.1 接入 · 超分尺寸契约（2026-09-24）
 
 > ⚠️ **破坏性变更**：① `comfy_render(workflow=…)` / `video_upscale(workflow=…)` 会**报错并指路**——实现改由配置决定（`preferred` 家族序 / `tiers` 档位选择 / `pins` 钉实现）；② 图片清单 id 由 `flux-text2image` 变为 `flux-text2image-{fast,balanced,quality}`（一档一清单）；③ 旧参数 `mode=` 已移除，档位一律用 `tier=`。
