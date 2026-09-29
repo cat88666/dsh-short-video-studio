@@ -6,3 +6,6 @@ node_modules/
 e2e-out/
 .tmp-workspace/
 canvas/
+
+# 包管理器本地缓存（pnpm 在本仓库默认把 store 建在项目根，内容寻址、可再生）
+.pnpm-store/
