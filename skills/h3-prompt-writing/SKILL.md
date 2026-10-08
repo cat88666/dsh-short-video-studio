@@ -54,7 +54,7 @@ Read `references/ref-en.txt` for label rules, retention analysis, and complete e
 
 ## 输入与条件启用
 
-- 输入：片型 skill（如 3d-animation-short-generator）在逐镜生成时提供的「本镜分镜章节 + 镜头表 `参考锚点` / `音频与对白轨` 行 + ref_nodes / first_frame / last_frame 绑定」。
+- 输入：片型 skill（如 story-short-generator）在逐镜生成时提供的「本镜分镜章节 + 镜头表 `参考锚点` / `音频与对白轨` 行 + ref_nodes / first_frame / last_frame 绑定」。
 - **仅当**当前 capability 的 `preferred` 工作流 id 前缀为 `minimax-h3-` 时应用本重写；其他工作流跳过（片型 skill 自由格式组装，模型无关）。
 - 参考图硬规则（单视图 / 图内零文字 / 不拼图 / first_frame 仅同场景续接）由插件工具契约统一约束，本 skill 遵守不重述。
 

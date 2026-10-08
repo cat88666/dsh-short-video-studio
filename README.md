@@ -43,6 +43,32 @@
 - **电商宣传视频**（商品/卖点 → 展示分镜 + 口播）、**教育课件讲解**（知识点 → 图解 + 讲解）、品牌故事、纪念短片、Vlog 解说……任何「输入 X → 产出视频」的创作场景，都通过**扩展一个 skill** 覆盖——复用同一套画布、生成工具、资产库与飞书交付，只换编排规则（见[开发你自己的场景 skill](#扩展开发你自己的场景-skill)）。
 - **场景与模型双解耦**：场景由 skill 定义、模型由注册表定义，两者互不绑定——电商场景也可以随时切换到你想用的任何 ComfyUI 模型。
 
+### 🎨 七套内置视觉风格：一套流程，七种画风
+
+同一个片型 skill（`story-short-generator`）内置 **7 套视觉风格**，开场（STEP 0）选定一套，**全流程统一使用**——角色卡、场景卡、道具卡、逐镜片段与成片都是同一套画风：
+
+| id | 风格 | 适用题材 |
+|---|---|---|
+| `pixar-3d` | 皮克斯感 3D 卡通（**默认**） | 合家欢、童话、成长、纪念短片 |
+| `cinematic-live-action` | 电影真人写实 | 现代剧情、悬疑、犯罪、纪实 |
+| `ghibli-2d` | 吉卜力 2D 手绘 | 治愈、自然、成长、奇幻冒险 |
+| `anime-cel` | 日式二次元赛璐璐 | 校园、青春、恋爱、日常 |
+| `ink-wash-oriental` | 水墨东方古风 | 古装、仙侠、武侠、历史 |
+| `comic-halftone` | 欧美漫画半调 | 超英、暗黑奇幻、西部、动作 |
+| `guofeng-xianxia` | 国风仙侠 3D | 仙侠、修真、玄幻、古风奇幻 |
+
+![七套内置视觉风格示例](./examples/styles/style-preview.jpg)
+
+<p align="center"><sub>上排 <code>guofeng-xianxia</code> · <code>ghibli-2d</code> · <code>anime-cel</code>　下排 <code>ink-wash-oriental</code> · <code>comic-halftone</code> · <code>cinematic-live-action</code></sub></p>
+
+> 上图为 6 套风格的 5s 验证帧（`fast` 档；`pixar-3d` 未列入本图）。**这些帧只用于确认"风格可区分 + 链路跑得通"**——实测 `fast` 档 4 步采样的人脸与细节保真不足（4 套风格的脸都出现年轻化 / 中性化漂移），**不能用来验收风格**；风格验收与成片请走 `balanced` / `quality`。
+
+**风格是一份文档，不是一个开关。** 每套风格 = 一个 `references/styles/<id>.md`（8 段固定模板：适用 / 视觉 DNA / 负向 / **风格锁后缀** / 分层适配 / 与参考图契约的关系 / 已知风险 / 实测状态），内含**可直接复制的英文风格锁后缀**。选型指引与换风格纪律在 `references/style-selection.md`。
+
+**风格锁后缀按产物取用**（三段，实测得出）：`锁 A · 渲染基调`（通用）/ `锁 B · 角色与表演`（角色卡 + 视频）/ `锁 C · 环境与氛围`（场景卡 + 视频）——因为实测**污染是双向的**：角色词会把人物拉进空场景，环境词会让纯底角色卡长出松树、石台与光束。风格后缀与负向**由片型 skill 拼接**，追加在 H3 结构化 prompt 之后。
+
+**换风格是破坏性操作**：已批准的卡片与全部片段都会失效，须显式确认后重出。
+
 ### 📱 飞书集成：远程操控工作台创作
 
 - 会话可以跑在**飞书聊天**里（配合 [dsh-lark](https://github.com/deepseek-ai) 飞书渠道）——你在飞书里说一句话，Agent 就在本地工作台上按 skill 走完整条流水线。
@@ -396,9 +422,9 @@ node scripts/import-comfy.mjs exported.json \
 
 ## 实战要点（沉淀自真实生产）
 
-1. **参考图必须用单视图**：参考图里有几个身体，画面就倾向出现几个角色；三视图拼图必然产生角色副本，且 prompt 声明无效（[实验报告](docs/three-view-experiment.md)）。只用单视图卡。
-2. **参考图内不得有任何文字**：角色名、FRONT VIEW 之类标注会被视频模型渲进成片。名字只写画布标题与资产元数据。
-3. **多角度对模型无增量价值**：单张正面卡足以支撑转身/走远镜头；多角度时把多张单视图分别放进不同 `ref_nodes` 槽位，绝不拼成一张图。
+1. **参考图默认用单视图，且风险与档位强相关**：`fast` 档下参考图里有几个身体，画面就倾向出现几个角色，**且泄漏样式不固定**——多出人、内容被投影成背景墙纸、环境被换掉材质都出现过；**`balanced` / `quality` 档实测不出副本**（角色卡 / 一图两身体 / 三视图均只出 1 个角色）。prompt 声明无效，只能从参考图形态或档位下手。⇒ `fast` 档对进 `ref_nodes` 的参考图设**形态门禁 G-ref**（单主体 / 单视图 / 零文字 / 无拼图）；`balanced` / `quality` 不受此限。证据与强度见 [`skills/story-short-generator/references/reference-image-contract.md`](skills/story-short-generator/references/reference-image-contract.md) 与[旧实验报告](docs/three-view-experiment.md)（后者全程只测了 `fast` 一档）。
+2. **参考图内不得有任何文字**：角色名、FRONT VIEW 之类标注会被视频模型渲进成片，`fast` 档尤甚（文档类参考图会以墙面投影形式把文字烙进画面）。名字只写画布标题与资产元数据。
+3. **多角度对模型无增量价值**：单张正面卡足以支撑转身/走远镜头；多角度时把多张单视图分别放进不同 `ref_nodes` 槽位（实测仍只出 1 个角色），绝不拼成一张图。
 4. **原生字幕**：使用带原生字幕能力的视频模型（如内置默认 H3）时，对白字幕写进 prompt 末尾即可端到端渲染（含中文）；换成不带该能力的模型后，此条不适用，字幕需走其它方式。
 5. **同场景续接优先用链式续接（`continuity_from`），不是末帧串联**：前者把上一镜的 latent 逐帧钉进本镜、音频也接着走，接缝几乎看不出来；后者只是拿一张静帧当首帧，模型仍要重新猜运动与声音。**跨场景不续接**，只放「角色 + 场景」参考。
 6. **转场镜与锚点式重渲是 i2v 的两处专用场景**：转场镜要精确落回下一镜首帧（末帧锚定），锚点式重渲要在改中段时保住下游首帧。两者都能**再叠**链式续接（用 `…-i2v-ctx-*`）：链式 i2v 里**首帧锚点会被丢弃**（开头由上一镜尾部决定）、**末帧锚点保留** ⇒ 尾部连续 + 精确落点同时拿到。
@@ -409,7 +435,7 @@ node scripts/import-comfy.mjs exported.json \
 本地 H3 工作流（`minimax-h3-*`）的逐镜 prompt 默认走 **H3 结构化格式**，用「本地 agent + skill」复刻官方云端 H3-Context-IR 的核心产物，提升成片质量（官方明言 Context-IR 直接决定输出质量）：
 
 - **`h3-prompt-writing` skill（插件适配版）**：官方 MiniMax 规范（`references/base-en.txt` / `ref-en.txt` 只读引用）+ 插件映射表 `references/studio-mapping.md`。参考绑定镜输出 **Ref2VA 六段式**（subject_definitions / summary / retention_analysis / detailed_description / overall_soundscape / non_diegetic_music）；首末帧串联镜 / 转场镜输出 **I2VA / FL2VA 三段式**（对齐指令 + integrated_multimodal_description + overall_soundscape + non_diegetic_music）。仅当解析工作流 id 前缀为 `minimax-h3-` 时启用，其他模型自动回退自由格式（模型无关）。
-- **片型 skill 委托**：3D 动画、品牌宣传等片型 skill 的逐镜生成步骤只写「加载 h3-prompt-writing 重写」，不内置任何 H3 字段细节（职能单一）。
+- **片型 skill 委托**：故事短片、品牌宣传等片型 skill 的逐镜生成步骤只写「加载 h3-prompt-writing 重写」，不内置任何 H3 字段细节（职能单一）。
 - **hook 门兜底**：`tools/pre-execute` 校验 H3 系工作流的 prompt 是否携带结构化字段，缺失时 deny 并引导 agent 加载 skill 重写（同一 agent 连续 2 次后降级放行，不会死循环）。
 - **关闭方式**：覆盖 / 删除 `~/.dsh/skills/h3-prompt-writing` 的「插件对接」适配节（或整体删目录）即回到自由格式组装；`lib/index.js` 的 `H3_PROMPT_GATE` 常量可单独关掉 hook 门。
 
@@ -417,11 +443,11 @@ node scripts/import-comfy.mjs exported.json \
 
 ## 示例：《一只想当宇航员的小狐狸》
 
-一个完整走完流水线的 30 秒 3D 动画短片（6 镜、quality 档、H3 原生字幕），展示画布各步骤的**真实产物**。
+一个完整走完流水线的 30 秒风格化短片（6 镜、quality 档、H3 原生字幕；示例用皮克斯感 3D 风格），展示画布各步骤的**真实产物**。
 
 ### 角色卡与场景卡
 
-> ⚠️ 以下角色卡为**历史三视图拼图 + 带标注文字**，属**反面示例**（实测会导致多角色副本与文字烙印）；正确做法见上文实战要点——单视图、零文字。
+> ⚠️ 以下角色卡为**历史三视图拼图 + 带标注文字**，属**反面示例**（会产生多角色副本与文字烙印；该结论在 `fast` 档测得——`balanced` / `quality` 档实测不出副本，但多视图仍不推荐：它没有一致性增量，且徒增风险）。正确做法见上文实战要点——单视图、零文字。
 
 | 小狐狸（不穿） | 小狐狸（穿宇航服） | 小兔子 |
 |---|---|---|
@@ -448,6 +474,30 @@ node scripts/import-comfy.mjs exported.json \
 ## 更新日志
 
 > 更早版本的完整变更见 [GitHub Releases](https://github.com/fengyungithub/dsh-short-video-studio/releases)（每次打 `v*` tag 自动生成）。
+
+### v1.9.0 — skill 改名 `story-short-generator` · 七套视觉风格 · 道具卡 · 参考图形态门禁（2026-10-08）
+
+**⚠️ 破坏性变更：自带 skill 改名**
+
+- `3d-animation-short-generator` → **`story-short-generator`**（目录名与 frontmatter `name:` 同步改）。原因：新增**电影真人写实 / 吉卜力 2D 手绘**等风格后，「3D」已名不符实。
+- **升级后一般无需手动清理**：`syncBundledSkills` 新增**孤儿回收**——目标端带本插件安装戳、但源 bundle 里已无同名目录的 skill 会被自动删除。安全底线：**无安装戳的目录（非本插件安装）永不删**；**你改过的副本默认也不删**，只提示（`DSH_SVS_SKILL_REFRESH=force` 才强删）。
+- 如果你**改过**旧 skill 副本（或在别处装过同名 skill）：确认不需要后手动 `rm -rf ~/.dsh/skills/3d-animation-short-generator`。
+
+**✨ `story-short-generator` v3.0.0**
+
+- **七套内置视觉风格**（STEP 0 可选，默认 `pixar-3d` = 旧行为）：皮克斯感 3D / 电影真人写实 / 吉卜力 2D 手绘 / 日式二次元赛璐璐 / 水墨东方古风 / 欧美漫画半调 / **国风仙侠 3D**（`guofeng-xianxia`，仙侠 / 修真 / 玄幻）。**一风格一文件**（`references/styles/<id>.md`，8 段固定模板，含可直接复制的英文风格锁后缀），选型指引与换风格纪律在 `references/style-selection.md`。原全局写死的风格锁（含「不要写实真人摄影」——与真人风格直接冲突）已按风格拆分。
+- **风格锁后缀按产物取用（抽卡实测换来的规则）**：后缀拆成 **锁 A 渲染基调**（无角色词也无场景物件词，通用）/ **锁 B 角色与表演**（角色卡 + 视频）/ **锁 C 环境与氛围**（场景卡 + 视频）。**污染是双向的**——角色词会让空场景冒出人物（`anime-cel` / `ink-wash-oriental` / `comic-halftone` 的场景卡均复现），环境词会让纯底角色卡长出松树石台与光束（`guofeng-xianxia` 复现）。⇒ 场景卡/道具卡不带 B，角色卡不带环境段。
+- **新增道具卡**（STEP 4.5 + 画布分组 `prop cards`）：签名道具单独建卡并可进 `ref_nodes`，避免形状 / 材质逐镜漂移。**收编为单视图单件**（`film-assets` 的多视图道具卡不适合本流程的参考绑定）。资产库无 `prop` 类型，入库推荐归到 `scene`（id 形如 `scene:prop-<name>`）。
+- **参考图形态门禁 G-ref（仅 `fast` 档）**：实测确认「多主体参考图出副本」是 **`fast` 档特有**现象——`fast` 档下角色卡出 5 个、一图两身体出 3 个、三视图让环境被换材质、设定图被投影成墙纸；**`balanced` / `quality` 档全部只出 1 个角色**（同一 prompt、同一 seed）。故 `fast` 档强制「单主体 / 单视图 / 零文字 / 无拼图」，不通过则不出图、给四个出路。完整矩阵与结论强度见 `skills/story-short-generator/references/reference-image-contract.md`（**档位与实现混淆未拆、N 小，属方向性证据**）。
+- **新增资产目录** `references/asset-catalog.md`（角色卡 / 场景卡 / 道具卡 / 风格锚点 / 片段 / 文本：形态规范、生成要求、自检项、入库限制）。
+- **图片档位独立于视频档位，默认 `quality`**：STEP 0 新增「图片档位」选项卡（与「生成档位（视频）」分开）。图片默认走 **`quality`**（长边 2048）——卡片是全程复用的身份 / 环境锚点，细节不够会连带重做镜头表、分镜与已渲片段。`balanced` / `fast` 只用于抽卡试构图，**其产物不得直接锁定**（锁定前须用选定档位重出定稿）。原「生成档位」一项现在明确为**视频档位**。
+- 镜头表自检门从**十项扩到十一项**（第 11 项：按当前档位的参考图形态合规）；门 3 自检新增第 6 项（风格一致）；终检新增道具一致性与风格一致性。
+
+**📝 文档 / 其它**
+
+- 插件 systemPrompt 的「参考图硬规则」改为**档位限定**表述（原文把 `fast` 档的结论当成了普适规则）。
+- [`docs/three-view-experiment.md`](docs/three-view-experiment.md) **追加**「补记：档位维度」——原实验全程只跑 `fast`（`mode=fast`、4 步 Lightning LoRA、832×480），结论**未被推翻**，只是缺档位维度。
+- README 实战要点 1–3 同步档位限定；`scripts/smoke-skill-install.mjs` 新增 4 组孤儿回收用例（含「无戳目录永不删」安全底线）。
 
 ### v1.8.1 — 仓库不再跟踪 pnpm 本地缓存（2026-09-29）
 
@@ -569,7 +619,7 @@ node scripts/import-comfy.mjs exported.json \
 - **视频形状 `type` 必填**（`r2v` 参考绑定 / `i2v` 首末帧串联）：形状与参数冲突**直接报错并给修法**，此前是静默丢弃参数；`comfy_generate_video` / `comfy_render` / `POST /generate/video` 共用同一张真值表，校验在**上传参考图之前**完成（非法请求零副作用）。视频节点现在记 `params.type`，画布可辨识转场镜 / 锚点式重渲。
 - **链式续接（`continuity_from`）全面落地**：同场景续接镜把上一镜的**服务端 latent 逐帧钉进本镜**、**音频从接缝继续**（实测接缝画面差 2.6–7.0，无续接对照 32–68；响度台阶稳定变好）。四档覆盖矩阵全绿，附录含测量口径与已知坑。
 - **i2v 也有链式实现**（组「MiniMax H3 首末帧·链式续接」，4 份清单）：模板由 `scripts/make-h3-ctx-templates.mjs` 从普通 i2v 模板**派生**（可复现）。**实测行为契约**：链式 i2v 里 `first_frame_node` **会被丢弃**（钉住的 head 已决定开头约 22 帧）、`last_frame_node` **保留** ⇒ 转场镜「续接上一场景尾镜 + 末帧锚定下一场景首镜」成为当前最优解，锚点式重渲也不再脱离续接链。**fast 档已端到端实测**（链路索引、22 帧 + 1.000s 音频上下文、裁剪与尾对齐补零、非链式反例拒跑全部通过）。
-- **续接变成规划期的一等公民**：`3d-animation-short-generator` v2.3.0 的镜头表从六列扩到**七列**（新增「续接」列：`起链` / `接 S0x` / `锚定 S0x↔S0y`），自检门扩到**十项**（续接链闭合性、续接可行性）；正片镜走 r2v + 续接，i2v 收敛为「转场镜 / 锚点式重渲」两处专用能力。
+- **续接变成规划期的一等公民**：`story-short-generator` v2.3.0 的镜头表从六列扩到**七列**（新增「续接」列：`起链` / `接 S0x` / `锚定 S0x↔S0y`），自检门扩到**十项**（续接链闭合性、续接可行性）；正片镜走 r2v + 续接，i2v 收敛为「转场镜 / 锚点式重渲」两处专用能力。
 - **自带 skill 版本戳刷新**：安装时复制到 `~/.dsh/skills/` 的每个副本带 `.dsh-studio-manifest`（插件版本 + 内容 sha256）；内容没被你改过就**随插件升级自动刷新**，改过就**只提示、不覆盖**（`DSH_SVS_SKILL_REFRESH=off|force` 可关/强制）。
 
 **📝 文档 / 其它**
@@ -581,7 +631,7 @@ node scripts/import-comfy.mjs exported.json \
 
 **✨ 新增 / 改进**
 
-- **字幕与画面内文案的写法收归单一权威**：`h3-prompt-writing` 该节升级为「字幕与画面内文案（唯一权威版）」，四条定稿写法 + 失败写法 + 容量阈值 + 档位口径集中一处；`3d-animation-short-generator` / `brand-promo-video-generator` **只引用、不复述**（原先各自带一份简化版，漏限定词会导致字幕整段不烧，属已实测缺陷）。画面内文案与字幕**同源同法**（标牌 / UI / 品牌文案同理）。
+- **字幕与画面内文案的写法收归单一权威**：`h3-prompt-writing` 该节升级为「字幕与画面内文案（唯一权威版）」，四条定稿写法 + 失败写法 + 容量阈值 + 档位口径集中一处；`story-short-generator` / `brand-promo-video-generator` **只引用、不复述**（原先各自带一份简化版，漏限定词会导致字幕整段不烧，属已实测缺陷）。画面内文案与字幕**同源同法**（标牌 / UI / 品牌文案同理）。
 - **适用面扩到「声明支持字幕的实现」**：H3 走结构化内嵌路径（Ref2VA 的 `detailed_description`、I2VA·FL2VA 的 `integrated_multimodal_description`），非 H3 走自由格式路径（英文引号逐字声明紧随对白 / 文案句，**不用末尾中文指令**）；两条路径的四条写法一致。
 - **档位口径写清**：字幕能力是**实现级属性**，判定权在逐镜自检门；**没有「某档必须出字幕」的硬规则**（默认 `quality`，同档换实现前先按取证入口验证）。
 - **新增选型参考文档** [`docs/i2v-vs-ref2v-and-model-comparison.md`](docs/i2v-vs-ref2v-and-model-comparison.md)：I2V 与 Ref2V 的机制差别、角色一致性 / 分辨率 / 时长 / 速度 / 音频与字幕 / 部署成本逐维对照（LTX-2.5 vs MiniMax H3）、按镜头类型的选型建议与未验证清单。**该文不属于插件契约**（插件侧只说能力、保持模型无关）。

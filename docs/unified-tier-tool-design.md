@@ -152,7 +152,7 @@ capability + tier
 - 删：全部 `workflow=` 教学、实现 id 举例、「换模型先查注册表再显式指定 workflow」流程。
 - 改：「生成 = 选能力 + 选档位 + 给画幅 + 给创作参数；实现由配置决定，技能不参与」。
 - 「换工作流」选项卡 → 「该档位不可用时的处置」（改档位 / 改配置 / 跳过）。
-- 范围：`3d-animation-short-generator`、`brand-promo-video-generator`、`video-generate`、`image-generate`、`h3-prompt-writing`（含 references）+ `lib/index.js` 的系统提示词 `GUIDANCE`。
+- 范围：`story-short-generator`、`brand-promo-video-generator`、`video-generate`、`image-generate`、`h3-prompt-writing`（含 references）+ `lib/index.js` 的系统提示词 `GUIDANCE`。
 - 设置页保留实现列表（配置面），仅改文案。
 
 ---

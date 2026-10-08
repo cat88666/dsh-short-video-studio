@@ -40,9 +40,10 @@ dsh-short-video-studio/
 ├── schemas/
 │   └── workflow-manifest.schema.json  # manifest 权威 JSON Schema（外部工具/文档参照）
 ├── skills/
-│   └── 3d-animation-short-generator/  # 自带 skill（安装时复制到 ~/.dsh/skills/）
+│   └── story-short-generator/   # 自带 skill（安装时复制到 ~/.dsh/skills/）
 │       ├── SKILL.md             # 流水线散文（Step 0-8、门控纪律、实践要点）
-│       └── references/          # 镜头表规范 / 分镜指南 / QC 清单 / 失败梯度 / 模型选择
+│       └── references/          # 资产目录 / 参考图契约 / 风格选型 / 镜头表规范 / 分镜指南 / QC 清单 / 失败梯度 / 模型选择
+│           └── styles/          # 七套视觉风格，一风格一文件（含风格锁后缀）
 ├── scripts/                     # 冒烟 / e2e / 转换脚本（无 npm scripts 编排，手动执行）
 ├── docs/                        # 设计文档与实验报告
 └── examples/fox/                # 示例片《一只想当宇航员的小狐狸》产物（含反面示例卡）
@@ -308,7 +309,7 @@ Agent 调用 comfy_generate_video(prompt, type='r2v', ref_nodes=[角色卡,场�
 | `studio/` | 自包含画布页：节点卡渲染、编辑/重做/入库/分组/排序/删除、markdown 表格解析、自绘模态、ask-ai postMessage、**双调色板跟随宿主浅/深**（`<html data-theme>`，app.css 两套调色板 + index.html 首屏脚本 + app.js message 监听） |
 | `workflows/` | 4 份内置 manifest（数据） |
 | `schemas/workflow-manifest.schema.json` | manifest 权威 JSON Schema |
-| `skills/3d-animation-short-generator/` | 其中一种片型的生产流程 skill（自包含单文件 SKILL.md + meta.yaml）；插件对它零认知 |
+| `skills/story-short-generator/` | 其中一种片型的生产流程 skill（自包含单文件 SKILL.md + meta.yaml）；插件对它零认知 |
 | `scripts/` 冒烟与走查 | `mock-apply`（装配冒烟）、`smoke-manifest`（M1 图编译等价）、`smoke-render`（M2 纯逻辑）、`smoke-concat`（拼接图拓扑）、`smoke-canvas-home`（画布的家 + 主题接线的纯逻辑）、`smoke-canvas-theme`（双调色板对等 / 零颜色字面量 / WCAG）、`preview-canvas`（真浏览器：两套主题的实际合成像素对比度 + 宽/窄栏响应式布局 + 资产库对话框三载体与删除交互 + 截图）、`smoke-assets`（真路由：三种载体的入库/删除/物化 + 老库兼容）、`preview-settings` / `preview-toolbar`（离屏渲染截图）、`lib/ui-probe.mjs`（宿主主题变量 + 浏览器内对比度/溢出度量，含 `color(srgb …)` 解析）、`probe-concat` / `probe-extract-frame`（实跑，需 ComfyUI）、`smoke-flux2` / `smoke-submit` / `e2e` / `e2e-comfy`（需 ComfyUI）、`import-comfy`（CLI 转换） |
 | `scripts/` 模板层（H3 一个 json = 一个档位实现） | `h3-templates/`（手写源）→ 三个生成器 → `workflows/`（产物，勿手改）：`make-h3-variants.mjs`（模板 → 单档清单，自动填 `requiresNodes`/`estSeconds`/`note`）、`make-pdd-template.mjs`（从同族 base 生成 PDD 模板，固定 6 处改动：model 直连 UNETLoader 不走 `$model` 哨兵、插 `MiniMaxH3PDDAccApply`、guider 改用其输出、删 `BasicScheduler`、`sigmas` 接该节点的 1 号输出、采样器强制 euler；shift 固定 12/3，`requiresNodes=['MiniMaxH3PDDAccApply']`，`priority=-30` 不做隐式默认）、`make-sol-attn-variant.mjs`（插 Sol 节点；`--after=<锚点>`，遇到 PDD 模板会自动锚定 PDD 节点、Sol id 改用 `2b`，避免与 Apply 节点的 `2a` 撞号） |
 | `scripts/bench-h3.mjs` + `e2e-out/{sharpness,noise-floor,frame-check,crop}.mjs` | 实测工具链：`bench-h3` 由**模板**直接组图跑真机并计时（两条臂只要 ref/seed/length/prompt 一致，差异即只来自配方；`--dry` 先核对配方）；`frame-check` 抽某帧、`sharpness` 比高频能量、`noise-floor` 比 16×16 分块梯度的低分位（**跨臂内容无关的噪声地板判据**：干净渲染里应有接近零的平坦块）。PDD 的"锐度高是细节还是颗粒"就是靠这一对指标判定的 |
@@ -364,7 +365,7 @@ Agent 调用 comfy_generate_video(prompt, type='r2v', ref_nodes=[角色卡,场�
 |---|---|
 | 工具契约（名/参数/语义） | ① `makeTools` description（硬）② `GUIDANCE` 工具契约段 ③ `SKILL.md` 工具映射表 |
 | 流水线 Step 0-8 | ① `GUIDANCE` ② `SKILL.md` 正文 ③ `references/`（更细规范） |
-| 实践要点（单视图/零文字） | ① `GUIDANCE` ② `SKILL.md` ③ README |
+| 实践要点（单视图/零文字/档位条件） | ① `GUIDANCE` ② `SKILL.md` ③ README ④ `references/reference-image-contract.md`（完整证据）。**档位限定**：`fast` 档才必出副本，`balanced` / `quality` 实测干净 |
 | 模型名 | ① `GUIDANCE`（「图片默认 flux-text2image」）② `SKILL.md` 正文括号备注 |
 
 两个漂移放大器：

@@ -82,7 +82,7 @@ capability = (first_frame_node || last_frame_node) ? 'video.image2video' : 'vide
 
 | 片型 skill | 形状策略 | 连续性机制 |
 |---|---|---|
-| `3d-animation-short-generator` | **正片镜一律 `r2v`**；**两处用 `i2v`**：跨场景转场镜、锚点式重渲 | **链式续接**：镜头表新增第七列 `续接`（`起链` / `接 S0x` / `锚定 S0x↔S0y`），连续镜头传 `continuity_from`、独立镜头不传；转场镜默认 i2v 双端锚定，若走链式 i2v 实现则额外继承上一镜尾部 |
+| `story-short-generator` | **正片镜一律 `r2v`**；**两处用 `i2v`**：跨场景转场镜、锚点式重渲 | **链式续接**：镜头表新增第七列 `续接`（`起链` / `接 S0x` / `锚定 S0x↔S0y`），连续镜头传 `continuity_from`、独立镜头不传；转场镜默认 i2v 双端锚定，若走链式 i2v 实现则额外继承上一镜尾部 |
 | `brand-promo-video-generator` | `r2v`（产品英雄镜）+ `i2v`（LOGO / UI 首帧锁定镜） | 首帧锁定是**业务硬需求**（品牌标识逐像素继承），保留 i2v；同场景续接镜仍可用 i2v 首帧串联 |
 | `video-generate`（输入框轻量链路） | 由用户在工具条选 `r2v` / `i2v` | 原样透传 `type`，不替用户决定 |
 

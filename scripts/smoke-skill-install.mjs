@@ -142,6 +142,38 @@ ok('标记文件不参与哈希', (() => {
   return hashSkillDir(join(dest, 'alpha')) === h1
 })())
 
+console.log('\n[10] 孤儿回收：源里下线/改名的自带 skill 要清掉目标端残留')
+// 此时 dest：alpha（已被 force 刷新过）、beta（已安装未改）、legacy（用户改过）、adopted、foreign（无安装戳）
+rmSync(join(bundle, 'beta'), { recursive: true, force: true })
+rmSync(join(bundle, 'legacy'), { recursive: true, force: true })
+rmSync(join(bundle, 'foreign'), { recursive: true, force: true })
+r = sync()
+ok('回收未改过的孤儿', r.reaped.includes('beta'), JSON.stringify(r.reaped))
+eq('目标端目录已删除', existsSync(join(dest, 'beta')), false)
+ok('用户改过的孤儿不回收', r.keptOrphans.includes('legacy'), JSON.stringify(r.keptOrphans))
+eq('用户改过的孤儿仍在', existsSync(join(dest, 'legacy')), true)
+eq('用户内容原样保留', read(join(dest, 'legacy', 'SKILL.md')), 'legacy 用户改过\n')
+eq('无安装戳的孤儿永不删（安全底线）', existsSync(join(dest, 'foreign')), true)
+eq('无戳目录不误判为待回收', r.reaped.includes('foreign') || r.keptOrphans.includes('foreign'), false)
+r = sync()
+eq('回收后不重复动作', r.reaped.length, 0)
+
+console.log('\n[10b] off 模式不回收')
+mkBundleSkill('gamma', 'g\n')
+r = sync()
+ok('gamma 已安装', r.installed.includes('gamma'), true)
+rmSync(join(bundle, 'gamma'), { recursive: true, force: true })
+r = sync({ refresh: 'off' })
+eq('off 模式回收 0 个', r.reaped.length, 0)
+eq('gamma 仍在', existsSync(join(dest, 'gamma')), true)
+
+console.log('\n[10c] force 模式：连用户改过的孤儿一起回收')
+r = sync({ refresh: 'force' })
+ok('force 回收 gamma', r.reaped.includes('gamma'), JSON.stringify(r.reaped))
+ok('force 回收用户改过的 legacy', r.reaped.includes('legacy'), JSON.stringify(r.reaped))
+eq('legacy 已删除', existsSync(join(dest, 'legacy')), false)
+eq('安全底线仍生效：无戳 foreign 未被删', existsSync(join(dest, 'foreign')), true)
+
 rmSync(root, { recursive: true, force: true })
 console.log(`\n${fail ? '✗' : '✓'} smoke-skill-install：${pass} 通过 / ${fail} 失败`)
 process.exit(fail ? 1 : 0)

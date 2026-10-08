@@ -38,7 +38,7 @@ MiniMax 官方 H3 系统 = **H3-Context-IR → H3-Base → H3-Regenerate-2K** �
 
 | Skill / 组件 | 职责 | 不负责 |
 |---|---|---|
-| **片型 skill**（3d-animation-short-generator，未来的电商 / 课件…） | 规定**生成视频的流程规范**：简报 → 大纲 → 卡片 → 镜头表 → 分镜 → 逐镜生成 → 拼接 → 交付，以及门控、失败梯度、项目级后缀（风格锁、字幕指令、负向） | **不**内置任何 H3 字段 / 六段式 / `<d>` 细节 |
+| **片型 skill**（story-short-generator，未来的电商 / 课件…） | 规定**生成视频的流程规范**：简报 → 大纲 → 卡片 → 镜头表 → 分镜 → 逐镜生成 → 拼接 → 交付，以及门控、失败梯度、项目级后缀（风格锁、字幕指令、负向） | **不**内置任何 H3 字段 / 六段式 / `<d>` 细节 |
 | **h3-prompt-writing**（官方名，插件适配版，prompt 优化专属） | **prompt 优化专属**：把「镜头表行 + 分镜章节 + 参考图绑定 + 音频模式」翻译为 H3 结构化 prompt（六段式 / 三段式 + 对齐指令 + `<d>` 对白），含产物字段映射表 | 不规定任何片型流程，不知道简报/卡片/门控是什么 |
 | **hook 门**（`tools/pre-execute`，可选） | 校验 comfy_generate_video 的 prompt 是否符合 h3-prompt-writing 的输出契约，不符合 deny 引导 | 不写 prompt，不做内容级判断 |
 
@@ -71,7 +71,7 @@ MiniMax 官方 H3 系统 = **H3-Context-IR → H3-Base → H3-Regenerate-2K** �
 
 ```text
 skills/
-├── 3d-animation-short-generator/
+├── story-short-generator/
 │   ├── SKILL.md              # 纯流程；Step 7「prompt 组装」改为委托 h3-prompt-writing
 │   └── meta.yaml
 └── h3-prompt-writing/        # 官方名；插件适配版 = 官方原样 + 适配追加节
@@ -171,7 +171,7 @@ h3-prompt-writing 输出 **H3 结构核心**（六段式 / 三段式 + 对齐指
 
 ## 6. 片型 skill 的改动（最小化：只加委托，不加实现）
 
-`3d-animation-short-generator/SKILL.md` 的 Step 7「prompt 组装」改为：
+`story-short-generator/SKILL.md` 的 Step 7「prompt 组装」改为：
 
 > 1. 取本镜分镜章节（已抽取的镜从独立节点）内容与镜头表 `参考锚点` / `音频与对白轨` 行。
 > 2. **调用 skill 工具加载 `h3-prompt-writing`**，按它的规范把分镜内容重写为 H3 结构化 prompt（skill 内部读官方正文与 `references/studio-mapping.md` 映射表）。
@@ -201,7 +201,7 @@ h3-prompt-writing 输出 **H3 结构核心**（六段式 / 三段式 + 对齐指
 
 1. **拷贝官方规范**：`skills/h3-prompt-writing/references/` 放入官方 `base-en.txt`、`ref-en.txt`（带来源/LICENSE 头注释）；SKILL.md 以官方原文为基底。
 2. **编写插件适配层**：SKILL.md 末尾追加「插件对接」适配节（§5.1 职责 + §5.4 实验结论 + 条件启用）+ `references/studio-mapping.md`（§5.2 映射表）+ `meta.yaml`（description 含触发条件）。
-3. **改造 3d-animation-short-generator**：Step 7「prompt 组装」改为委托式（§6），其余不动。
+3. **改造 story-short-generator**：Step 7「prompt 组装」改为委托式（§6），其余不动。
 4. **安装冲突处理**：lib/index.js 的 skill 安装逻辑加 §4.2 同名来源检测（插件标记 / 跳过提示）。
 5. **小规模实验**：取现有《小狐狸》S01 同分镜做 A/B（§5.4），记录结果。
 6. **hook 门（可选）**：lib/index.js 注册 `tools/pre-execute` 监听器，按 §7 逻辑实现校验与降级；含单元测试。

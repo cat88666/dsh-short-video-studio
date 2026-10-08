@@ -22,7 +22,7 @@
 
 ## 1. 三套真相并存，且已经漂移（P0）
 
-`systemPrompt` 的 `GUIDANCE` 常量（lib/index.js:1761-1797）与 `skills/3d-animation-short-generator/SKILL.md` 有大面积内容重复：工具契约、Step 0-8 流水线、门控纪律、实践要点、边界，两边各写一遍。
+`systemPrompt` 的 `GUIDANCE` 常量（lib/index.js:1761-1797）与 `skills/story-short-generator/SKILL.md` 有大面积内容重复：工具契约、Step 0-8 流水线、门控纪律、实践要点、边界，两边各写一遍。
 
 ### 1.1 三视图/单视图矛盾 —— ✅ 已修复
 

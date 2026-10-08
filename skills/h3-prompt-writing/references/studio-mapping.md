@@ -40,7 +40,7 @@
 ## 2. 首末帧串联镜 / 转场镜（video.image2video）→ I2VA / FL2VA 三段式
 
 > **使用范围**：仅 `brand-promo-video-generator` 等仍使用 i2v 的片型需要本节；
-> `3d-animation-short-generator` 的**正片镜一律 r2v**（连续镜头用 `continuity_from`，走 §1/§1.1 六段式）；**只有两处**走本节：**跨场景转场镜**（双端锚定：前一场景尾镜末帧 + 下一场景首镜首帧）与**锚点式重渲**（上游末帧 + 下游首帧）。
+> `story-short-generator` 的**正片镜一律 r2v**（连续镜头用 `continuity_from`，走 §1/§1.1 六段式）；**只有两处**走本节：**跨场景转场镜**（双端锚定：前一场景尾镜末帧 + 下一场景首镜首帧）与**锚点式重渲**（上游末帧 + 下游首帧）。
 
 输出顺序（见 `base-en.txt`）：对齐指令（首行，独占一段）→ `integrated_multimodal_description` → `overall_soundscape` → `non_diegetic_music`。
 

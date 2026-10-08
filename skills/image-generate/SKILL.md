@@ -79,4 +79,4 @@ Keep the flying pig exactly as it is, only change the sky from daytime blue to a
 
 ## 与片型 skill 的边界
 
-本 skill 只承担「手动生成图片」（文生图 / 参考图改绘），不产出简报/大纲/角色卡/镜头表，不做逐镜编排。需要完整短剧/动画/品牌片流程时，交给 `3d-animation-short-generator` 或 `brand-promo-video-generator`。
+本 skill 只承担「手动生成图片」（文生图 / 参考图改绘），不产出简报/大纲/角色卡/镜头表，不做逐镜编排。需要完整短剧/动画/品牌片流程时，交给 `story-short-generator` 或 `brand-promo-video-generator`。
