@@ -143,7 +143,7 @@ export function planRefs(shot, bible) → { refs: string[], warnings: string[] }
 - 场景卡只在场景首镜或换场景镜传入
 - 风格锚点在全片所有镜头恒定传入 —— 顺带让 `style:` 资产类型真正可用（解掉 D3 尾巴）
 - 总数超过 `manifest.params.refs.max`（当前 8）时按优先级截断并 `warnings` 提示，而不是静默丢弃
-- 三视图角色卡拒绝作为 ref（用 `preset: 'character-card'` 的标记位判断），落回 W1 的单视图卡。**注（2026-10-08）**：补测显示副本只在 `fast` 档必现，`balanced` / `quality` 实测干净——所以这条拦截的**硬门禁范围应限定在 `fast` 档**（见 `skills/story-short-generator/references/reference-image-contract.md`），单视图仍是默认推荐形态
+- 三视图角色卡拒绝作为 ref（用 `preset: 'character-card'` 的标记位判断），落回 W1 的单视图卡。**注（2026-10-08）**：补测显示副本只在 `fast` 档必现，`balanced` / `quality` 实测干净——所以这条拦截的**硬门禁范围应限定在 `fast` 档**（见 `skills/story-short-generator/references/reference-image-contract.md`）。**注（2026-10-10）**：规则进一步演进为**形态分档**——角色卡默认形态随项目视频档位（`fast` 单视图 / `balanced`·`quality` 三视图横排），因此本条「拒绝三视图卡」只保留在 `fast` 档；本节 W1.3 的 `preset` 方案若要实施，需按档位产出两种形态而不是固定单视图。
 
 同时在 `buildRenderGraph` 前加一次断言：`video.reference2video` 且 prompt 含 `[SPEAKER]` 非 `n/a` 时，refs 必须非空且首位为该说话人的角色资产，否则报错而非静默生成。
 

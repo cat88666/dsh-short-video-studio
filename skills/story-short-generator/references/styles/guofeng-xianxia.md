@@ -55,7 +55,7 @@ STYLE LOCK-C — luminous crisp cloud seas with clearly separated layers, bright
 
 ## 5. 分层适配
 
-- **角色卡**：单视图正面全身 + **锁 A + 锁 B**（**不带 C**）。服饰层次、发式、法器写进**角色卡节点描述**，不画进图内文字。
+- **角色卡**：形态随视频档位（`fast` 单视图正面全身 / `balanced`·`quality` 三视图横排）+ **锁 A + 锁 B**（**不带 C**）。服饰层次、发式、法器写进**角色卡节点描述**，不画进图内文字。
   - ⚠️ **背景用中性中灰（#8a8a8a 左右），不要纯白**。实测教训：白 / 淡色仙裙 + 纯白背景 + bloom 会三重过曝，人物轮廓糊进背景、作为参考卡不可用。
   - ⚠️ **卡片 prompt 里收住发光**：追加 `controlled highlights, minimal bloom`。
 - **场景卡**：本风格的绝对强项（仙山云海、宫阙、剑冢、秘境）。**锁 A + 锁 C**、单视图、零文字、无人物。
@@ -66,7 +66,7 @@ STYLE LOCK-C — luminous crisp cloud seas with clearly separated layers, bright
 
 ## 6. 与参考图契约的关系
 
-本风格**不改变**参考图硬规则（单视图 / 零文字 / 不拼图）；`fast` 档仍受 G-ref 门禁约束（见 [reference-image-contract.md](../reference-image-contract.md)）。写实材质会让参考图上的文字 / 水印以**更高保真度**烙进成片，`fast` 档尤其不要绕过门禁。
+本风格**不改变**形态规则（角色卡随视频档位：`fast` 单视图 / `balanced`·`quality` 三视图横排）与「零文字 / 不拼图」硬规则；`fast` 档仍受 G-ref 门禁约束（见 [reference-image-contract.md](../reference-image-contract.md)）。写实材质会让参考图上的文字 / 水印以**更高保真度**烙进成片，`fast` 档尤其不要绕过门禁。
 
 ## 7. 已知风险与未实测项
 
@@ -77,7 +77,7 @@ STYLE LOCK-C — luminous crisp cloud seas with clearly separated layers, bright
 
 **剩余风险**：
 
-- **写实人脸 + 跨镜一致性压力上升**：写实脸的身份漂移比风格化脸更显眼。角色卡必须严格单视图零文字、**记录并复用 seed**，`ref_nodes` 绑定要严格执行；对白镜建议 `quality`。
+- **写实人脸 + 跨镜一致性压力上升**：写实脸的身份漂移比风格化脸更显眼。角色卡必须严格零文字（形态按视频档位）、**记录并复用 seed**，`ref_nodes` 绑定要严格执行；对白镜建议 `quality`。
 - **淡色系仙裙（白 / 淡蓝）仍易过曝**：已靠「中灰底 + 收 bloom」缓解，但白裙镜仍需在 prompt 里写 `controlled highlights`。
 - **飘逸长带 / 长发 / 纱质**在长镜头里容易崩形（成组运动对模型是难点）。
 - **未实测**：收紧后的新锁在**视频层**的表现；御剑 / 轻功的中段形变；与 `h3-prompt-writing` 字幕写法叠加时亮背景对字幕可读性的影响（必要时给字幕镜选深色背景）。

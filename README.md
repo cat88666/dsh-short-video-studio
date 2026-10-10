@@ -1,6 +1,6 @@
 # dsh-short-video-studio
 [![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/fengyungithub/dsh-short-video-studio)
-[![DSH](https://img.shields.io/badge/DSH-0.1.6--alpha.2-4c6ef5?style=flat-square&labelColor=454a54)](https://github.com/deepseek-ai/deepseek-harness)
+[![DSH](https://img.shields.io/badge/DSH-0.2.1--alpha.2-4c6ef5?style=flat-square&labelColor=454a54)](https://github.com/deepseek-ai/deepseek-harness)
 
 **完全本地 · 免费 · 零云端依赖**的**短剧 / 动画画布工作室**，作为 [DeepSeek Harness](https://github.com/deepseek-ai) 双面插件运行。所有生成都跑在**本地 ComfyUI** 上——不需要任何付费云 API、不消耗额度，装好即用，一次生成、无限出片。
 
@@ -308,7 +308,7 @@ whenToUse: 适用于……不适用于……
 
 ## 生产流程
 1. 开场：用 canvas_set_state 声明画幅/时长/音频模式与分组展示顺序
-2. 用 comfy_generate_image 建角色卡/场景卡（单视图、零文字）
+2. 用 comfy_generate_image 建卡片（**角色卡形态随视频档位**：`fast` 单视图 / `balanced`·`quality` 三视图横排；场景卡与道具卡单视图；全部零文字）
 3. 用 comfy_generate_video(type=…, tier=…) 逐镜生成（fast 调试 → quality 成片）
 4. 用 video_concat 拼接，交付前把文本要点写进回复（飞书自动送达产物）
 ```
@@ -422,13 +422,13 @@ node scripts/import-comfy.mjs exported.json \
 
 ## 实战要点（沉淀自真实生产）
 
-1. **参考图默认用单视图，且风险与档位强相关**：`fast` 档下参考图里有几个身体，画面就倾向出现几个角色，**且泄漏样式不固定**——多出人、内容被投影成背景墙纸、环境被换掉材质都出现过；**`balanced` / `quality` 档实测不出副本**（角色卡 / 一图两身体 / 三视图均只出 1 个角色）。prompt 声明无效，只能从参考图形态或档位下手。⇒ `fast` 档对进 `ref_nodes` 的参考图设**形态门禁 G-ref**（单主体 / 单视图 / 零文字 / 无拼图）；`balanced` / `quality` 不受此限。证据与强度见 [`skills/story-short-generator/references/reference-image-contract.md`](skills/story-short-generator/references/reference-image-contract.md) 与[旧实验报告](docs/three-view-experiment.md)（后者全程只测了 `fast` 一档）。
+1. **角色卡形态跟着视频档位走，参考图风险也与档位强相关**：`fast` 档下参考图里有几个身体，画面就倾向出现几个角色，**且泄漏样式不固定**——多出人、内容被投影成背景墙纸、环境被换掉材质都出现过；**`balanced` / `quality` 档实测干净**（角色卡 / 一图两身体 / 三视图均只出 1 个角色）。prompt 声明无效，只能从参考图形态或档位下手。⇒ **默认形态**：`fast` → 单视图正面全身；`balanced` / `quality` → **三视图横排**（正 / 侧 / 背全身，1×3，纯底零文字）。⇒ `fast` 档对进 `ref_nodes` 的参考图设**形态门禁 G-ref**（单主体 / 单视图 / 零文字 / 无拼图），判定键是**每次调用实际传入的 `tier`**；`balanced` / `quality` 不受此限。场景卡与道具卡不随档位改形态（仍单视图）。证据与强度见 [`skills/story-short-generator/references/reference-image-contract.md`](skills/story-short-generator/references/reference-image-contract.md) 与[旧实验报告](docs/three-view-experiment.md)（后者全程只测了 `fast` 一档）。
 2. **参考图内不得有任何文字**：角色名、FRONT VIEW 之类标注会被视频模型渲进成片，`fast` 档尤甚（文档类参考图会以墙面投影形式把文字烙进画面）。名字只写画布标题与资产元数据。
-3. **多角度对模型无增量价值**：单张正面卡足以支撑转身/走远镜头；多角度时把多张单视图分别放进不同 `ref_nodes` 槽位（实测仍只出 1 个角色），绝不拼成一张图。
+3. **多角度由卡片形态承担，不要临时拼图**：单张正面卡足以支撑转身/走远，非 `fast` 档直接用三视图横排卡；确需更多角度时把多张图分别放进不同 `ref_nodes` 槽位（实测仍只出 1 个角色），**绝不临时拼成一张图**。
 4. **原生字幕**：使用带原生字幕能力的视频模型（如内置默认 H3）时，对白字幕写进 prompt 末尾即可端到端渲染（含中文）；换成不带该能力的模型后，此条不适用，字幕需走其它方式。
 5. **同场景续接优先用链式续接（`continuity_from`），不是末帧串联**：前者把上一镜的 latent 逐帧钉进本镜、音频也接着走，接缝几乎看不出来；后者只是拿一张静帧当首帧，模型仍要重新猜运动与声音。**跨场景不续接**，只放「角色 + 场景」参考。
 6. **转场镜与锚点式重渲是 i2v 的两处专用场景**：转场镜要精确落回下一镜首帧（末帧锚定），锚点式重渲要在改中段时保住下游首帧。两者都能**再叠**链式续接（用 `…-i2v-ctx-*`）：链式 i2v 里**首帧锚点会被丢弃**（开头由上一镜尾部决定）、**末帧锚点保留** ⇒ 尾部连续 + 精确落点同时拿到。
-7. **角色分状态建卡**：同一角色不同着装分别建单视图卡。
+7. **角色分状态建卡**：同一角色不同着装分别建状态卡，形态按视频档位（`fast` 单视图 / 其余档三视图横排）。
 
 ## H3 结构化 prompt（本地版 H3-Context-IR 替代）
 
@@ -447,7 +447,7 @@ node scripts/import-comfy.mjs exported.json \
 
 ### 角色卡与场景卡
 
-> ⚠️ 以下角色卡为**历史三视图拼图 + 带标注文字**，属**反面示例**（会产生多角色副本与文字烙印；该结论在 `fast` 档测得——`balanced` / `quality` 档实测不出副本，但多视图仍不推荐：它没有一致性增量，且徒增风险）。正确做法见上文实战要点——单视图、零文字。
+> ⚠️ 以下角色卡为**历史示例（仍属反面）**：多视图拼图 **+ 图内文字标注**，且用的是「左侧 1 全身 + 右侧 3 个头部特写」的卡面布局。按现行规则，**非 `fast` 档的角色卡默认就是多视图**——但默认形态是**三视图横排（正 / 侧 / 背全身，1×3）**且要求**零文字、无分隔线**；这三张的标注文字与头特写混排都不符合（`fast` 档下该布局实测出 5 个副本）。正确做法见上文实战要点。
 
 | 小狐狸（不穿） | 小狐狸（穿宇航服） | 小兔子 |
 |---|---|---|
@@ -475,6 +475,18 @@ node scripts/import-comfy.mjs exported.json \
 
 > 更早版本的完整变更见 [GitHub Releases](https://github.com/fengyungithub/dsh-short-video-studio/releases)（每次打 `v*` tag 自动生成）。
 
+### v1.10.0 — 角色卡形态分档：单视图 / 三视图横排随视频档位（2026-10-10）
+
+**✨ `story-short-generator` v3.1.0 · 规则变更：角色卡默认形态跟着项目视频档位走**
+
+- **`fast`** → **单视图正面全身**（一图一人）；**`balanced` / `quality`** → **三视图横排**（正 / 侧 / 背全身，1×3，纯底、零文字）。判定键是 STEP 0 选定、`canvas_set_state(mode=…)` 持久化的**视频档位**（不是图片档位——图片档位只决定采样尺寸）。
+- **`fast` 档的形态门禁 G-ref 不变**，仍按**每次调用实际传入的 `tier`** 判定；**混合档位下最常见的踩线点**是非 `fast` 项目里把某镜临时降到 `fast`——该镜要么升档、要么临时补一张单视图。
+- **只改角色卡**：场景卡、道具卡**不随档位改形态**（仍单视图）——多视图对这两类资产在非 `fast` 档没有实测依据。
+- **卡片画幅**：单视图 2:3 竖版（`fast` 672×1024 · `balanced` 896×1344 · `quality` 1344×2016）；三视图 16:9 横版（`fast` 1024×576 · `balanced` 1344×768 · `quality` 2048×1152）。尺寸按图片档位长边推导，32 对齐。
+- **依据**：`fast` 档多主体参考图必漏（角色卡 4 身体 → 成片 5 个实例）；`balanced` 档角色卡、`quality` 档三视图实测均**只出 1 个角色**，且「档位 vs 实现」混淆已由钉实现实验拆开（差异跟档位 / 采样配置，不跟实现家族）。完整矩阵见 [`reference-image-contract.md`](skills/story-short-generator/references/reference-image-contract.md)。
+- **待补证**（已登记在契约 §4）：`balanced` 档的三视图横排、`quality` 档的角色卡布局尚未单独实测——按多主体 + 纯底 + 零文字的共性外推。
+- **落点**：`story-short-generator` 的 SKILL.md（STEP 0 / 3 / 4 / 4.5 / 5.5 / 7、参考图形态与档位节）、`references/{asset-catalog,reference-image-contract,style-selection}.md`、7 份 `references/styles/*.md`、`meta.yaml`；`image-generate` / `video-generate` / `h3-prompt-writing` 的口径同步；插件 systemPrompt 的「参考图硬规则」同步。
+
 ### v1.9.0 — skill 改名 `story-short-generator` · 七套视觉风格 · 道具卡 · 参考图形态门禁（2026-10-08）
 
 **⚠️ 破坏性变更：自带 skill 改名**
@@ -488,7 +500,7 @@ node scripts/import-comfy.mjs exported.json \
 - **七套内置视觉风格**（STEP 0 可选，默认 `pixar-3d` = 旧行为）：皮克斯感 3D / 电影真人写实 / 吉卜力 2D 手绘 / 日式二次元赛璐璐 / 水墨东方古风 / 欧美漫画半调 / **国风仙侠 3D**（`guofeng-xianxia`，仙侠 / 修真 / 玄幻）。**一风格一文件**（`references/styles/<id>.md`，8 段固定模板，含可直接复制的英文风格锁后缀），选型指引与换风格纪律在 `references/style-selection.md`。原全局写死的风格锁（含「不要写实真人摄影」——与真人风格直接冲突）已按风格拆分。
 - **风格锁后缀按产物取用（抽卡实测换来的规则）**：后缀拆成 **锁 A 渲染基调**（无角色词也无场景物件词，通用）/ **锁 B 角色与表演**（角色卡 + 视频）/ **锁 C 环境与氛围**（场景卡 + 视频）。**污染是双向的**——角色词会让空场景冒出人物（`anime-cel` / `ink-wash-oriental` / `comic-halftone` 的场景卡均复现），环境词会让纯底角色卡长出松树石台与光束（`guofeng-xianxia` 复现）。⇒ 场景卡/道具卡不带 B，角色卡不带环境段。
 - **新增道具卡**（STEP 4.5 + 画布分组 `prop cards`）：签名道具单独建卡并可进 `ref_nodes`，避免形状 / 材质逐镜漂移。**收编为单视图单件**（`film-assets` 的多视图道具卡不适合本流程的参考绑定）。资产库无 `prop` 类型，入库推荐归到 `scene`（id 形如 `scene:prop-<name>`）。
-- **参考图形态门禁 G-ref（仅 `fast` 档）**：实测确认「多主体参考图出副本」是 **`fast` 档特有**现象——`fast` 档下角色卡出 5 个、一图两身体出 3 个、三视图让环境被换材质、设定图被投影成墙纸；**`balanced` / `quality` 档全部只出 1 个角色**（同一 prompt、同一 seed）。故 `fast` 档强制「单主体 / 单视图 / 零文字 / 无拼图」，不通过则不出图、给四个出路。完整矩阵与结论强度见 `skills/story-short-generator/references/reference-image-contract.md`（**档位与实现混淆未拆、N 小，属方向性证据**）。
+- **参考图形态门禁 G-ref（仅 `fast` 档）**：实测确认「多主体参考图出副本」是 **`fast` 档特有**现象——`fast` 档下角色卡出 5 个、一图两身体出 3 个、三视图让环境被换材质、设定图被投影成墙纸；**`balanced` / `quality` 档全部只出 1 个角色**（同一 prompt、同一 seed）。故 `fast` 档强制「单主体 / 单视图 / 零文字 / 无拼图」，不通过则不出图、给四个出路。完整矩阵与结论强度见 `skills/story-short-generator/references/reference-image-contract.md`（**「档位 vs 实现」混淆已在随后一轮钉实现实验中拆开——差异跟档位/采样配置，不跟实现家族；每格 N 仍小，属方向性证据**）。
 - **新增资产目录** `references/asset-catalog.md`（角色卡 / 场景卡 / 道具卡 / 风格锚点 / 片段 / 文本：形态规范、生成要求、自检项、入库限制）。
 - **图片档位独立于视频档位，默认 `quality`**：STEP 0 新增「图片档位」选项卡（与「生成档位（视频）」分开）。图片默认走 **`quality`**（长边 2048）——卡片是全程复用的身份 / 环境锚点，细节不够会连带重做镜头表、分镜与已渲片段。`balanced` / `fast` 只用于抽卡试构图，**其产物不得直接锁定**（锁定前须用选定档位重出定稿）。原「生成档位」一项现在明确为**视频档位**。
 - 镜头表自检门从**十项扩到十一项**（第 11 项：按当前档位的参考图形态合规）；门 3 自检新增第 6 项（风格一致）；终检新增道具一致性与风格一致性。

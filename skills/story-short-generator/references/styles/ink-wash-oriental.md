@@ -38,7 +38,7 @@ STYLE LOCK-B — traditional aesthetic bone structure with elongated eyes and fl
 
 ## 5. 分层适配
 
-- **角色卡**：单视图正面全身 + **锁 A + 锁 B**。**背景务必留白 / 素色**——宣纸肌理容易被背景杂物干扰。
+- **角色卡**：形态随视频档位（`fast` 单视图正面全身 / `balanced`·`quality` 三视图横排）+ **锁 A + 锁 B**。**背景务必留白 / 素色**——宣纸肌理容易被背景杂物干扰。
 - **场景卡**：本风格强项。山水 / 庭院 / 室内都要写明"近实远虚"的层次与留白位置；**只加锁 A**。⚠️ **不要带锁 B**——`posture language` / `flowing drapery` 会把人物拉进画面（**实测已复现**：本风格的场景卡里出现了一个白衣女子，违反"场景卡只展示环境"）。
 - **道具卡**：单件道具单视图 + **只加锁 A**；器物（剑、扇、瓷、灯）用白描勾线。
 - **视频片段（r2v / i2v）**：**锁 A + 锁 B**，追加在 H3 结构化 prompt **之后**。运镜宜缓（摇、移、升），避免快速手持。
@@ -46,7 +46,7 @@ STYLE LOCK-B — traditional aesthetic bone structure with elongated eyes and fl
 
 ## 6. 与参考图契约的关系
 
-本风格**不改变**参考图硬规则（单视图 / 零文字 / 不拼图）；`fast` 档仍受 G-ref 门禁约束（见 [reference-image-contract.md](../reference-image-contract.md)）。
+本风格**不改变**形态规则（角色卡随视频档位：`fast` 单视图 / `balanced`·`quality` 三视图横排）与「零文字 / 不拼图」硬规则；`fast` 档仍受 G-ref 门禁约束（见 [reference-image-contract.md](../reference-image-contract.md)）。
 
 ## 7. 已知风险与未实测项
 
@@ -54,7 +54,7 @@ STYLE LOCK-B — traditional aesthetic bone structure with elongated eyes and fl
 - **风险**：大面积淡彩 + 低对比，字幕与口型的可读性可能下降。
 - **未实测**：本后缀对动态笔触的影响；与续接链叠加的表现。
 - ✅ **已实测并修复（视频层，2026-10-08）**：**水墨风会在画面里自发添加竖排书法题款**——`fast` 档 5s 镜头实测左缘出现一整列乱码汉字，直接违反「图内零文字」硬规则。**已修**：锁 A 与 §3 负向都补了 `NOT calligraphy text / NOT vertical inscribed characters / NOT seal stamps / NOT any writing`。**修复后未复测**。
-- ⚠️ **视频层风格保真偏弱**：同一镜头里成片偏**写实柔光**而非工笔淡墨（与角色卡同病），风格辨识度是 6 套里最弱的。
+- ⚠️ **视频层风格保真偏弱**：同一镜头里成片偏**写实柔光**而非工笔淡墨（与角色卡同病），风格辨识度是 7 套里最弱的。
 
 ## 8. 实测状态
 

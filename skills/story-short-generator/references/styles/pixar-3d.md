@@ -40,7 +40,7 @@ STYLE LOCK-B — appealing stylized proportions, crisp silhouette shapes with fi
 
 ## 5. 分层适配
 
-- **角色卡**：单视图正面全身 + **锁 A + 锁 B**。Q 版比例写进**角色卡节点描述**，不画进图内文字。
+- **角色卡**：形态随视频档位（`fast` 单视图正面全身 / `balanced`·`quality` 三视图横排）+ **锁 A + 锁 B**。Q 版比例写进**角色卡节点描述**，不画进图内文字。
 - **场景卡**：只画环境 + **只加锁 A**。⚠️ 场景卡**不要带锁 B**——B 段里的表演 / 解剖语言会把人物拉进画面（实测：`anime-cel` / `ink-wash-oriental` / `comic-halftone` 的场景卡就是因为后缀里的表演条款而出现了人物，违反"场景卡只展示环境"）。
 - **道具卡**：单件道具单视图 + **只加锁 A**。
 - **视频片段（r2v / i2v）**：**锁 A + 锁 B**，追加在 H3 结构化 prompt **之后**（风格锁与负向由片型侧拼接，不归 `h3-prompt-writing`）。
@@ -48,11 +48,11 @@ STYLE LOCK-B — appealing stylized proportions, crisp silhouette shapes with fi
 
 ## 6. 与参考图契约的关系
 
-本风格**不改变**参考图硬规则：参考图仍须单视图 / 零文字 / 不拼图；`fast` 档仍受 G-ref 门禁约束（见 [reference-image-contract.md](../reference-image-contract.md)）。
+本风格**不改变**形态规则（角色卡随视频档位：`fast` 单视图 / `balanced`·`quality` 三视图横排）与「零文字 / 不拼图」硬规则；`fast` 档仍受 G-ref 门禁约束（见 [reference-image-contract.md](../reference-image-contract.md)）。
 
 ## 7. 已知风险与未实测项
 
-- 高概括度造型 + 强剪影对跨镜一致性有利，是 6 套里跨镜漂移风险最低的一套（**方向性判断，未做定量对照**）。
+- 高概括度造型 + 强剪影对跨镜一致性有利，是 7 套里跨镜漂移风险最低的一套（**方向性判断，未做定量对照**）。
 - **未实测**：后缀长度是否影响口型与字幕渲染；在非默认实现上的表现。
 
 ## 8. 实测状态

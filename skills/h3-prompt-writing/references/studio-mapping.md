@@ -58,7 +58,7 @@
 - 对白逐字保留（含标点），不翻译不改写；`<d>` 内只放语言标签与原文。
 - 参考标签（`<Subject N>` / `<Picture N>` / `<Video N>` / `<Audio N>`）跨节保持一致，不重复定义。
 - 景别、镜头运动（类型 + 幅度 + 速度）、口型纪律全部写进 `detailed_description` / `integrated_multimodal_description`，不留到字段外。
-- 参考图硬规则不变：单视图、图内零文字、不拼图、多角度分别占不同 ref_nodes 槽位。
+- 参考图硬规则：**角色卡形态随视频档位**（`fast` 单视图 / `balanced`·`quality` 三视图横排）、图内零文字、不把多张图临时拼成一张；需要更多角度时分别占不同 `ref_nodes` 槽位。
 
 ## 4. 与片型 skill 的边界（项目级后缀）
 
